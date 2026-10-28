@@ -2,10 +2,10 @@ import './App.scss';
 
 import usersFromServer from './api/users';
 import todosFromServer from './api/todos';
-import { TodoList } from './components/TodoList';
 import { ToDosType } from './types/TodosType';
 import { UsersType } from './types/UsersType';
 import React, { useState } from 'react';
+import { TodoList } from './components/TodoList';
 
 function getId(newTodos: ToDosType[]) {
   return Math.max(...newTodos.map(todo => +todo.id)) + 1;
@@ -13,7 +13,16 @@ function getId(newTodos: ToDosType[]) {
 
 export const App = () => {
   const users: UsersType[] = [...usersFromServer];
-  const [newTodos, setNewTodos] = useState<ToDosType[]>([...todosFromServer]);
+  const [newTodos, setNewTodos] = useState<ToDosType[]>(
+    todosFromServer.map(todo => {
+      const foundUser = usersFromServer.find(user => user.id === todo.userId);
+
+      return {
+        ...todo,
+        user: foundUser,
+      };
+    }),
+  );
 
   const [title, setTitle] = useState('');
   const [userId, setUserId] = useState(0);
@@ -46,6 +55,7 @@ export const App = () => {
         title: title,
         completed: false,
         userId: userId,
+        user: usersFromServer.find(user => user.id === userId),
       },
     ]);
 
